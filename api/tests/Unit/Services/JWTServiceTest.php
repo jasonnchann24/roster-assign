@@ -214,4 +214,19 @@ class JWTServiceTest extends TestCase
         $this->assertFalse(Cache::tags(['refresh_tokens'])->has($cacheKey1));
         $this->assertFalse(Cache::tags(['refresh_tokens'])->has($cacheKey2));
     }
+
+    public function test_it_can_use_expired_access_token_for_refresh()
+    {
+        $supplier = Supplier::factory()->create();
+
+        $tokenData = $this->jwtService->generateTokenPair($supplier);
+
+        $this->travel($tokenData['expires_in'] + 2)->seconds();
+
+        $result = $this->jwtService->refreshTokens($tokenData['access_token'], $tokenData['refresh_token']);
+
+        $this->assertNotNull($result);
+        $this->assertArrayHasKey('access_token', $result);
+        $this->assertArrayHasKey('refresh_token', $result);
+    }
 }

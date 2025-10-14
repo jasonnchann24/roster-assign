@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VoucheController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,10 @@ Route::name('api.')->group(function () {
 
     // Protected
     Route::middleware('jwt.access')->group(function () {
-        //
+
+        Route::apiResource('vouches', VoucheController::class)->only([
+            'store',
+            'destroy',
+        ]);
     });
 });

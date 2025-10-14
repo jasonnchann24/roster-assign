@@ -29,7 +29,7 @@ trait ApiResponseTrait
     /**
      * Error response
      */
-    protected function errorResponse(string $error, int $statusCode = 400, $data = null): JsonResponse
+    protected function errorResponse(string $error, int $statusCode = 400, $data = null, $additionals = null): JsonResponse
     {
         $response = [
             'status' => 'error',
@@ -38,6 +38,10 @@ trait ApiResponseTrait
 
         if ($data !== null) {
             $response['data'] = $data;
+        }
+
+        if ($additionals !== null && is_array($additionals)) {
+            $response = array_merge($response, $additionals);
         }
 
         return response()->json($response, $statusCode);

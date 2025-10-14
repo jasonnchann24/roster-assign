@@ -21,9 +21,16 @@ class AuthController extends Controller
     /**
      * Determine if the request is from a mobile app
      */
-    private function isMobileApp(Request $request): bool
+    private function isCookieMode(Request $request): bool
     {
-        return $request->header('X-Client-Type') !== 'web';
+        $cookieMode = config('auth.cookie_mode');
+        if ($cookieMode !== null) {
+            return $cookieMode;
+        }
+
+        $userAgent =  $request->userAgent();
+        $isWeb = preg_match('/Chrome|Firefox|Safari|Edge/', $userAgent);
+        return !$isWeb;
     }
 
     /**
@@ -75,8 +82,7 @@ class AuthController extends Controller
 
         $response = $this->successWithData($data, "Login successful");
 
-        if ($this->isMobileApp($request)) {
-            // For mobile apps: return refresh token in response headers
+        if (!$this->isCookieMode($request)) {
             return $response
                 ->header('X-Refresh-Token', $tokenData['refresh_token'])
                 ->header('X-Refresh-Expires-In', $tokenData['refresh_expires_in']);
@@ -91,10 +97,10 @@ class AuthController extends Controller
     public function refresh(Request $request)
     {
         $accessToken = $request->bearerToken();
-        $isMobileApp = $this->isMobileApp($request);
+        $isCookieMode = $this->isCookieMode($request);
 
         // Get refresh token from appropriate source
-        $refreshToken = $isMobileApp
+        $refreshToken = !$isCookieMode
             ? $request->header('X-Refresh-Token')
             : $request->cookie('refresh_token');
 
@@ -119,8 +125,7 @@ class AuthController extends Controller
 
         $response = $this->successWithData($data, "Token refreshed successfully");
 
-        if ($isMobileApp) {
-            // For mobile apps: return refresh token in response headers
+        if (!$isCookieMode) {
             return $response
                 ->header('X-Refresh-Token', $result['refresh_token'])
                 ->header('X-Refresh-Expires-In', $result['refresh_expires_in']);
@@ -138,8 +143,7 @@ class AuthController extends Controller
         $this->jwtService->revokeTokens($supplier);
 
         $response = $this->successWithMessage('Successfully logged out');
-        if ($this->isMobileApp($request)) {
-            // For mobile apps: just return success message
+        if (!$this->isCookieMode($request)) {
             return $response;
         }
 

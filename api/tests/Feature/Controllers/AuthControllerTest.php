@@ -30,6 +30,13 @@ class AuthControllerTest extends TestCase
         $this->assertRouteUsesMiddleware('api.auth.me', ['jwt.access']);
     }
 
+    public function test_routes_should_be_public()
+    {
+        $this->assertRouteIsPublic('api.register');
+        $this->assertRouteIsPublic('api.login');
+        $this->assertRouteIsPublic('api.auth.refresh');
+    }
+
     public function test_it_should_use_form_request()
     {
         $this->assertRouteUsesFormRequest('api.register', SupplierFormRequest::class);
@@ -92,7 +99,8 @@ class AuthControllerTest extends TestCase
                     'expires_in',
                 ]
             ])
-            ->assertHeader('X-Refresh-Token');
+            ->assertHeader('X-Refresh-Token')
+            ->assertHeader('X-Refresh-Expires-In');
 
         $this->assertEquals('success', $response->json('status'));
         $this->assertEquals('Bearer', $response->json('data.token_type'));
@@ -135,7 +143,8 @@ class AuthControllerTest extends TestCase
                     'expires_in',
                 ]
             ])
-            ->assertHeader('X-Refresh-Token');
+            ->assertHeader('X-Refresh-Token')
+            ->assertHeader('X-Refresh-Expires-In');
     }
 
     public function test_it_returns_error_when_refresh_token_is_missing()

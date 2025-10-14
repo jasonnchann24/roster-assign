@@ -4,6 +4,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cookie Mode
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether the application should use cookie-based
+    | refresh tokens. If set to true, the application will
+    | use cookies to store the refresh tokens. If false, refresh tokens
+    | will be stored in the Authorization header as a Bearer token. If null,
+    | the application will auto-detect based on the user-agent.
+    |
+    */
+
+    'cookie_mode' => env('COOKIE_MODE'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |

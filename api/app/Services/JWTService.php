@@ -3,8 +3,12 @@
 namespace App\Services;
 
 use App\Models\Supplier;
+use Exception;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Throwable;
+use Tymon\JWTAuth\Claims\Collection;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class JWTService
@@ -49,7 +53,15 @@ class JWTService
     {
         try {
             JWTAuth::setToken($accessToken);
-            $accessPayload = JWTAuth::getPayload();
+
+            try {
+                $accessPayload = JWTAuth::getPayload();
+            } catch (TokenExpiredException $e) {
+                // For refresh flow, we need to get payload from expired token
+                // Use checkOrFail(false) to ignore expiration
+                $accessPayload = JWTAuth::manager()->getPayloadFactory()->buildClaimsCollection()->toPlainArray();
+                $accessPayload = Collection::make($accessPayload);
+            }
 
             if ($accessPayload->get('type') !== 'access') {
                 return null;
@@ -59,6 +71,7 @@ class JWTService
             $supplier = Supplier::find($userId);
 
             if (!$supplier) {
+
                 return null;
             }
 
@@ -91,6 +104,7 @@ class JWTService
 
             return $this->generateTokenPair($supplier);
         } catch (Throwable $e) {
+            Log::error('Error refreshing tokens: ' . $e->getMessage());
             return null;
         }
     }

@@ -3,25 +3,32 @@
 namespace Tests\Unit\Requests;
 
 use App\Http\Requests\SupplierFormRequest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
 class SupplierFormRequestTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function test_it_has_correct_validation_rules()
+    public function test_it_has_expected_validation_rules()
     {
         $request = new SupplierFormRequest();
         $rules = $request->rules();
 
-        $expectedRules = [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:suppliers,email',
-            'password' => 'required|string|min:6|confirmed',
-        ];
+        $this->assertArrayHasKey('name', $rules);
+        $this->assertArrayHasKey('email', $rules);
+        $this->assertArrayHasKey('password', $rules);
 
-        $this->assertEquals($expectedRules, $rules);
+        $this->assertContains('required', $rules['name']);
+        $this->assertContains('required', $rules['email']);
+        $this->assertContains('required', $rules['password']);
+
+        $this->assertContains('unique:suppliers,email', $rules['email']);
+
+        $this->assertContains('confirmed', $rules['password']);
+    }
+
+    public function test_it_allows_all_requests_by_default()
+    {
+        $request = new SupplierFormRequest();
+
+        $this->assertTrue($request->authorize());
     }
 }

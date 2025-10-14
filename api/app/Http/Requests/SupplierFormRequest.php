@@ -22,9 +22,9 @@ class SupplierFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:suppliers,email',
-            'password' => 'required|string|min:6|confirmed',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:suppliers,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
         ];
     }
 }

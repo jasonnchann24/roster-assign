@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -12,7 +13,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class Supplier extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\SupplierFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -63,5 +64,21 @@ class Supplier extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    /**
+     * Get vouches made by this supplier.
+     */
+    public function vouchesMade()
+    {
+        return $this->hasMany(Vouche::class, 'vouched_by_id');
+    }
+
+    /**
+     * Get vouches received.
+     */
+    public function vouchesReceived()
+    {
+        return $this->hasMany(Vouche::class, 'vouched_for_id');
     }
 }
