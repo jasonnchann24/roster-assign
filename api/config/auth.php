@@ -8,10 +8,17 @@ return [
     |--------------------------------------------------------------------------
     |
     | This value determines whether the application should use cookie-based
-    | refresh tokens. If set to true, the application will
-    | use cookies to store the refresh tokens. If false, refresh tokens
-    | will be stored in the Authorization header as a Bearer token. If null,
-    | the application will auto-detect based on the user-agent.
+    | refresh tokens. If set to true (web), the application will
+    | use http only cookies to send the refresh tokens. If false (mobile apps), refresh tokens
+    | will be sent in the response header (X-Refresh-Token). If null,
+    | the application will auto-detect which one to use based on the user-agent.
+    |
+    | Cookie Mode False: When refreshing token, you need to pass the "access_token" in the body
+    | and the "X-Refresh-Token" in the header.
+    |
+    | Cookie Mode True: When refreshing token, you only need to pass the "access_token" in the body
+    | as the "X-Refresh-Token" cookie will be sent automatically. Make sure your credentials settings
+    | are set to include. fetch(..., { credentials: 'include' })
     |
     */
 
