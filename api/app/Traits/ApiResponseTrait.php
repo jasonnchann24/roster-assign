@@ -138,4 +138,38 @@ trait ApiResponseTrait
 
         return $response;
     }
+
+    /**
+     * List response with pagination meta data
+     */
+    protected function listResponse($data,  string $message = 'Data retrieved successfully', $pagination = [], $meta = [], int $statusCode = 200): JsonResponse
+    {
+        $response = [
+            'status' => 'success',
+            'data' => $data,
+            'message' => $message
+        ];
+
+        if (!empty($meta)) {
+            $response['meta'] = $meta;
+        }
+
+        if (!empty($pagination)) {
+            $response['pagination'] = $pagination;
+        }
+
+        return response()->json($response, $statusCode);
+    }
+
+
+    /**
+     * Helper to extract pagination meta from Laravel paginator
+     */
+    protected function getPaginationMeta($paginator): array
+    {
+        $paginatorArray = $paginator->toArray();
+        unset($paginatorArray['data']);
+
+        return $paginatorArray;
+    }
 }

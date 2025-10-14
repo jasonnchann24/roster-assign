@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('vouched_for_id')->constrained('suppliers')->onDelete('cascade');
             $table->text('message')->nullable();
             $table->timestamps();
+
+            $table->unique(['vouched_by_id', 'vouched_for_id'], 'unique_voucher_vouche');
         });
     }
 

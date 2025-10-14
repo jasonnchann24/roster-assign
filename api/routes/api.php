@@ -25,8 +25,12 @@ Route::name('api.')->group(function () {
     Route::middleware('jwt.access')->group(function () {
 
         Route::apiResource('vouches', VoucheController::class)->only([
+            'index',
             'store',
             'destroy',
         ]);
+
+        // Get vouches for a specific supplier
+        Route::get('vouches/{supplier_id}', [VoucheController::class, 'index'])->name('vouches.by-supplier');
     });
 });
