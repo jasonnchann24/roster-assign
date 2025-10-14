@@ -5,6 +5,7 @@ namespace Tests;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use PHPUnit\Framework\Assert as PHPUnitAssert;
 use JMac\Testing\Traits\AdditionalAssertions;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -31,5 +32,23 @@ abstract class TestCase extends BaseTestCase
         $foundRestrictedMiddlewares = array_intersect($restrictedMiddlewares, $usedMiddlewares);
 
         PHPUnitAssert::assertTrue(count($foundRestrictedMiddlewares) === 0, "Route `$routeName` should be public but uses restricted `" . implode(', ', $foundRestrictedMiddlewares) . '` middleware(s)');
+    }
+
+    /**
+     * Make an authenticated JSON request with JWT token
+     */
+    protected function authenticatedJson($method, $uri, array $data = [], array $headers = [], $user = null)
+    {
+        if ($user) {
+            $token = JWTAuth::claims(['type' => 'access'])
+                ->fromUser($user);
+        } else {
+            // If no user provided, try to use the current authenticated user
+            $token = JWTAuth::claims(['type' => 'access'])
+                ->fromUser($this->user ?? \App\Models\Supplier::factory()->create());
+        }
+
+        $headers['Authorization'] = 'Bearer ' . $token;
+        return $this->json($method, $uri, $data, $headers);
     }
 }
